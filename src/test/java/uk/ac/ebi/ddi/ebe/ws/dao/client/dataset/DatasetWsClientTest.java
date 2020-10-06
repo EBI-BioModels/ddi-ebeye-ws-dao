@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.ac.ebi.ddi.ebe.ws.dao.config.AbstractEbeyeWsConfig;
+import uk.ac.ebi.ddi.ebe.ws.dao.model.common.Entry;
 import uk.ac.ebi.ddi.ebe.ws.dao.model.common.QueryResult;
 import uk.ac.ebi.ddi.ebe.ws.dao.model.dataset.SimilarResult;
 import uk.ac.ebi.ddi.ebe.ws.dao.model.dataset.TermResult;
@@ -16,6 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @ContextConfiguration(locations = {"/test-context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -46,6 +48,16 @@ public class DatasetWsClientTest {
         String sort = "isprivate:ascending,tokenised_name:ascending";
         QueryResult biomodels = datasetWsClient.getDatasets("biomodels", "*:*", fields, 0, 10, 20, sort);
         assertNotNull(biomodels.getCount() > 1);
+        sort = "id:descending,isprivate:ascending";
+        String queryString = "metabolic networks AND curationstatus:\'Manually curated\'";
+        biomodels = datasetWsClient.getDatasets("biomodels", queryString, fields,
+                0, 10, 20, sort);
+        assertNotNull(biomodels.getCount() > 1);
+        String idE1 = biomodels.getEntries()[0].getId().substring(5);
+        String idE2 = biomodels.getEntries()[1].getId().substring(5);
+        // because the results are sorted descending on entry id, so we hope the first entry id is greater than the
+        // second one
+        assertTrue(Integer.parseInt(idE1) > Integer.parseInt(idE2));
     }
 
    /* @Test
