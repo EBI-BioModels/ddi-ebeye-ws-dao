@@ -82,12 +82,13 @@ public class DatasetWsClient extends EbeyeClient {
      * @param start      number of the first entry to retrieve
      * @param size       Number of entries to be retrieve maximum 100.
      * @param facetCount Face count the number of facets by entry.
-     * @param sortField       Sortable fields and how to sort data.
+     * @param sortField  Sortable fields and how to sort data.
+     *                   Pattern example: "name:ascending,description:descending"
      * @return           A {@link java.util.List} of entries and the facets included
      */
     public QueryResult getDatasets(String domainName, String query, String[] fields,
                                    int start, int size, int facetCount, String sortField) {
-        String finalFields = DDIUtils.getConcatenatedField(fields);
+         String finalFields = DDIUtils.getConcatenatedField(fields);
 
          UriComponentsBuilder builder = UriComponentsBuilder.newInstance()
             .scheme(config.getProtocol())
@@ -101,10 +102,14 @@ public class DatasetWsClient extends EbeyeClient {
             .queryParam("facetcount", facetCount)
             .queryParam("format", "JSON");
 
+         if (sortField != null && sortField.length() > 0) {
+            builder.queryParam("sort", sortField);
+         }
+
          URI uri = builder.build().encode().toUri();
          String searchURI = uri.toString();
          LOGGER.debug("Search URI: {}", searchURI);
-        return this.restTemplate.getForObject(uri, QueryResult.class);
+         return this.restTemplate.getForObject(uri, QueryResult.class);
     }
 
     /**
